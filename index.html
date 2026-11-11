@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>One-Thumb Drums</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html, body { height:100%; overflow:hidden; background:#0d0a14; }
+  body {
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    color:#f5efff; touch-action:none; user-select:none; -webkit-user-select:none;
+    overscroll-behavior:none;
+  }
+  #app { height:100dvh; display:flex; flex-direction:column; max-width:480px; margin:0 auto;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    background:linear-gradient(180deg,#17102a 0%,#0d0a14 60%,#1a0f1e 100%); }
+  .hidden { display:none !important; }
+  button { font-family:inherit; }
+
+  /* ---- Select screen ---- */
+  #select { flex:1; display:flex; flex-direction:column; padding:14px 16px 12px; overflow-y:auto; }
+  .hero { text-align:center; padding:6px 0 2px; position:relative; }
+  .hero .notes { font-size:22px; letter-spacing:14px; color:#f5c542; opacity:.9; animation:float 2.4s ease-in-out infinite; }
+  @keyframes float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-5px); } }
+  .hero .drumart { font-size:64px; line-height:1; margin:2px 0 0; filter:drop-shadow(0 0 18px rgba(245,197,66,.45)); }
+  #select h1 { font-size:44px; line-height:.95; letter-spacing:1px; text-align:center; margin:4px 0 2px; font-weight:900;
+    background:linear-gradient(180deg,#fff 20%,#f5c542 60%,#ff7a3d 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+    filter:drop-shadow(0 3px 0 rgba(0,0,0,.45)) drop-shadow(0 0 22px rgba(245,197,66,.25)); }
+  #select h1 span { -webkit-text-fill-color:#ff5a5a; }
+  #select .sub { text-align:center; color:#e8ddff; font-size:15px; margin:6px 0 12px; line-height:1.45; }
+  #select .sub b { color:#f5c542; }
+  #ctaPlay { display:block; width:100%; padding:16px; border:none; border-radius:18px; cursor:pointer;
+    background:linear-gradient(180deg,#ffd95e,#f5a623); color:#1a1206; font-size:20px; font-weight:900; letter-spacing:.5px;
+    box-shadow:0 6px 0 #9a6d14, 0 10px 24px rgba(245,166,35,.4); margin-bottom:4px; }
+  #ctaPlay:active { transform:translateY(3px); box-shadow:0 3px 0 #9a6d14; }
+  #ctaPlay small { display:block; font-size:12px; font-weight:700; opacity:.75; margin-top:2px; }
+  #select h2.songshead { font-size:13px; letter-spacing:2px; color:#b9a8d9; text-align:center; margin:12px 0 8px; }
+  .track { width:100%; text-align:left; background:linear-gradient(180deg,#2a1e47,#241a3d); border:2px solid #3d2a66; border-radius:16px;
+    padding:14px 16px; margin-bottom:10px; color:#f5efff; cursor:pointer; }
+  .track:active { background:#332453; transform:scale(.98); }
+  .track .name { font-size:20px; font-weight:700; }
+  .track .meta { font-size:13px; color:#b9a8d9; margin-top:3px; }
+  .track .diff { float:right; font-size:12px; font-weight:700; padding:3px 9px; border-radius:20px; background:#f5c542; color:#1a1206; }
+  .track .diff.easy { background:#7fd08a; } .track .diff.hard { background:#ff9a3d; } .track .diff.expert { background:#ff5a5a; }
+  .track .playchip { float:right; clear:right; margin-top:6px; font-size:12px; font-weight:800; color:#f5c542; letter-spacing:1px; }
+  .howto { background:#1d1430; border:1px solid #3d2a66; border-radius:14px; padding:12px 14px; margin-top:2px; font-size:13.5px; line-height:1.9; color:#e8ddff; }
+  .howto b { color:#f5c542; }
+  #select .credit { text-align:center; color:#8d7bb0; font-size:11.5px; margin-top:12px; line-height:1.5; }
+  #padtest { display:flex; gap:8px; margin-top:12px; }
+  #padtest button { flex:1; padding:12px 0; border-radius:12px; border:1px solid #3d2a66; background:#1d1430; color:#f5efff; font-size:14px; font-weight:700; }
+  .mixrow { display:flex; align-items:center; gap:10px; margin:10px 0 2px; font-size:14px; text-align:left; }
+  .mixrow label { width:64px; font-weight:700; }
+  .mixrow input[type=range] { flex:1; accent-color:#f5c542; }
+
+  /* ---- Game screen ---- */
+  #game { flex:1; display:flex; flex-direction:column; }
+  #hud { display:flex; justify-content:space-between; align-items:center; padding:10px 14px 4px; }
+  #hud .score { font-size:24px; font-weight:800; }
+  #hud .combo { font-size:15px; color:#f5c542; font-weight:700; text-align:right; }
+  #hud .combo small { display:block; color:#b9a8d9; font-size:11px; }
+  #topbar { display:flex; align-items:center; gap:10px; padding:0 14px 6px; }
+  #songtitle { font-size:13px; color:#b9a8d9; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #pauseBtn { background:#241a3d; border:1px solid #3d2a66; color:#f5efff; border-radius:10px; padding:6px 12px; font-size:14px; }
+  #progressWrap { height:6px; background:#241a3d; border-radius:3px; margin:0 14px 6px; overflow:hidden; }
+  #progress { height:100%; width:0%; background:#f5c542; }
+  #judge { text-align:center; height:26px; font-size:20px; font-weight:800; letter-spacing:1px; }
+  #judge.perfect { color:#7fd08a; } #judge.good { color:#f5c542; } #judge.miss { color:#ff5a5a; }
+  #highway { position:relative; flex:1; margin:0 14px; border-radius:14px; overflow:hidden;
+    background:linear-gradient(180deg,#120d20,#1d1430); border:1px solid #2c2145; }
+  .lane { position:absolute; top:0; bottom:0; border-left:1px solid rgba(255,255,255,.05); z-index:0; }
+  .lane:first-child { border-left:none; }
+  .lane span { position:absolute; top:6px; left:0; right:0; text-align:center; font-size:10px; font-weight:800; letter-spacing:2px; opacity:.55; }
+  /* Fancy notes (Nov 11, Playtest note: "just ovals" — now glossy drum-head
+     discs with a rim, 3D gradient, glow and a per-pad icon) */
+  .note { position:absolute; width:calc(25% - 10px); left:5px; height:30px; border-radius:15px;
+    transform:translateY(-50%); display:flex; align-items:center; justify-content:center;
+    font-size:15px; line-height:1; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.65);
+    border:2px solid rgba(255,255,255,.9);
+    box-shadow:0 2px 10px rgba(0,0,0,.55), 0 0 14px currentColor, inset 0 -4px 6px rgba(0,0,0,.35), inset 0 3px 5px rgba(255,255,255,.45);
+    overflow:hidden; }
+  .note::before { content:''; position:absolute; inset:0; border-radius:13px;
+    background:radial-gradient(ellipse at 50% 22%, rgba(255,255,255,.55), rgba(255,255,255,0) 55%); pointer-events:none; }
+  .note::after { content:''; position:absolute; top:2px; left:8px; right:8px; height:5px; border-radius:3px;
+    background:linear-gradient(180deg, rgba(255,255,255,.65), rgba(255,255,255,0)); pointer-events:none; }
+  .note span { position:relative; z-index:1; color:#fff; }
+  .note.kick { background:radial-gradient(circle at 50% 35%, #ff8a7a, #ff5a5a 55%, #b02828); color:#ff5a5a; }
+  .note.snare { background:radial-gradient(circle at 50% 35%, #ffe9a3, #f5c542 55%, #a8781a); color:#f5c542; }
+  .note.hat { background:radial-gradient(circle at 50% 35%, #bcd8ff, #7fb8ff 55%, #2f6cb0); color:#7fb8ff; }
+  .note.splash { background:radial-gradient(circle at 50% 35%, #ffc2ec, #ff8ad8 55%, #c22d92); color:#ff8ad8; }
+  .note.hit { opacity:0; }
+  #hitline { position:absolute; left:0; right:0; height:4px; background:#f5c542;
+    box-shadow:0 0 12px #f5c542; bottom:18%; }
+  #hitline::after { content:'HIT'; position:absolute; right:8px; top:-18px; font-size:10px; color:#f5c542; letter-spacing:2px; }
+  /* Hit-effect canvas: fireworks/sparks drawn over the highway, under the pads */
+  #fx { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:5; }
+  .note { z-index:2; } #hitline { z-index:3; }
+  #pads { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; padding:10px 14px calc(10px + env(safe-area-inset-bottom)); }
+  .pad { height:96px; border-radius:18px; border:2px solid rgba(255,255,255,.25); color:#fff;
+    font-size:17px; font-weight:800; letter-spacing:.5px; touch-action:none; }
+  .pad small { display:block; font-size:11px; font-weight:600; opacity:.75; margin-top:2px; }
+  .pad:active, .pad.pressed { transform:scale(.94); filter:brightness(1.4); }
+  /* Brief flash when its lane scores a hit — colour set inline per pad */
+  .pad.hitflash { filter:brightness(1.9) saturate(1.3); }
+  #pad-kick { background:linear-gradient(180deg,#c0392b,#8e2418); }
+  #pad-snare { background:linear-gradient(180deg,#d9a441,#9a6d14); color:#1a1206; }
+  #pad-hat { background:linear-gradient(180deg,#3d7bc4,#24507f); }
+  #pad-splash { background:linear-gradient(180deg,#d6339c,#8a1f66); }
+
+  /* ---- Overlays ---- */
+  .overlay { position:fixed; inset:0; background:rgba(10,6,20,.88); display:flex; align-items:center; justify-content:center; z-index:10; padding:20px; }
+  .card { background:#241a3d; border:2px solid #3d2a66; border-radius:20px; padding:24px 20px; width:100%; max-width:360px; text-align:center; }
+  .card h2 { font-size:26px; margin-bottom:6px; }
+  .card p { color:#b9a8d9; font-size:14px; line-height:1.55; margin-bottom:14px; }
+  .card .big { font-size:44px; font-weight:800; color:#f5c542; margin:8px 0 2px; }
+  .card .stats { font-size:15px; line-height:1.9; margin:10px 0 16px; }
+  .card .stats b { color:#f5c542; }
+  .btn { display:block; width:100%; padding:14px; border-radius:14px; border:none; background:#f5c542; color:#1a1206;
+    font-size:17px; font-weight:800; margin-top:8px; cursor:pointer; }
+  .btn.ghost { background:transparent; border:2px solid #3d2a66; color:#f5efff; }
+  .btn:active { transform:scale(.98); }
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- SELECT -->
+  <div id="select">
+    <div class="hero">
+      <div class="notes">♪&nbsp;&nbsp;♫&nbsp;&nbsp;♪</div>
+      <div class="drumart">🥁</div>
+      <h1>ONE-THUMB<br><span>DRUMS</span></h1>
+      <div class="sub">The backing track has no drums.<br><b>You</b> are the drummer.</div>
+    </div>
+    <button id="ctaPlay">▶&nbsp; TAP TO PLAY<small>Start with Cathedral Rain · Easy · 100 BPM</small></button>
+    <h2 class="songshead">— CHOOSE YOUR SONG —</h2>
+    <div id="trackList"></div>
+    <div class="howto">
+      <div>🎵 <b>Notes fall</b> down the highway — watch the gold line</div>
+      <div>👆 <b>Tap the matching pad</b> (Kick · Snare · Hi-Hat) right as a note crosses it — Splash is optional, tap it anytime</div>
+      <div>⭐ <b>Perfect</b> ±70 ms = 300 pts · <b>Good</b> ±140 ms = 100 pts · Miss breaks your combo</div>
+    </div>
+    <div id="padtest">
+      <button data-pad="kick">🥁 Kick</button>
+      <button data-pad="snare">🥁 Snare</button>
+      <button data-pad="hat">🥁 Hat</button>
+      <button data-pad="splash">🥁 Splash</button>
+    </div>
+    <div class="credit">Tap the pads above to hear the drums.<br>Music: original CC0 tracks · Drums: real CC0 samples</div>
+  </div>
+
+  <!-- GAME -->
+  <div id="game" class="hidden">
+    <div id="hud">
+      <div class="score"><span id="score">0</span></div>
+      <div class="combo"><span id="combo">0</span> combo<small id="acc">100% acc</small></div>
+    </div>
+    <div id="topbar"><div id="songtitle"></div><button id="pauseBtn">⏸ Pause</button></div>
+    <div id="progressWrap"><div id="progress"></div></div>
+    <div id="judge"></div>
+    <div id="highway"><canvas id="fx"></canvas>
+      <div class="lane" style="left:0%;width:25%;background:rgba(255,90,90,.06)"><span style="color:#ff5a5a">KICK</span></div>
+      <div class="lane" style="left:25%;width:25%;background:rgba(245,197,66,.06)"><span style="color:#f5c542">SNARE</span></div>
+      <div class="lane" style="left:50%;width:25%;background:rgba(127,184,255,.06)"><span style="color:#7fb8ff">HI-HAT</span></div>
+      <div class="lane" style="left:75%;width:25%;background:rgba(255,138,216,.10)"><span style="color:#ff8ad8">SPLASH</span></div>
+      <div id="hitline"></div></div>
+    <div id="pads">
+      <button class="pad" id="pad-kick" data-pad="kick">KICK<small>beat 1 &amp; 3</small></button>
+      <button class="pad" id="pad-snare" data-pad="snare">SNARE<small>beat 2 &amp; 4</small></button>
+      <button class="pad" id="pad-hat" data-pad="hat">HI-HAT<small>off-beats</small></button>
+      <button class="pad" id="pad-splash" data-pad="splash">SPLASH<small>optional · free play</small></button>
+    </div>
+  </div>
+</div>
+
+<!-- PAUSE -->
+<div id="pauseOverlay" class="overlay hidden"><div class="card">
+  <h2>Paused</h2><p id="pauseText"></p>
+  <div class="mixrow"><label>🥁 Drums</label><input type="range" id="drumVol" min="0" max="150" value="100"><span id="drumVolVal">100%</span></div>
+  <div class="mixrow"><label>🎵 Music</label><input type="range" id="musicVol" min="0" max="150" value="100"><span id="musicVolVal">100%</span></div>
+  <button class="btn" id="resumeBtn">▶ Resume</button>
+  <button class="btn ghost" id="restartBtn">↻ Restart song</button>
+  <button class="btn ghost" id="quitBtn">✕ Back to songs</button>
+</div></div>
+
+<!-- RESULTS -->
+<div id="resultOverlay" class="overlay hidden"><div class="card">
+  <h2 id="resultTitle">Song complete!</h2>
+  <div class="big" id="resultGrade">A</div>
+  <div class="stats" id="resultStats"></div>
+  <button class="btn" id="againBtn">↻ Play again</button>
+  <button class="btn ghost" id="songsBtn">🎵 Choose another song</button>
+</div></div>
+
+<script src="chart-v3.js?v=4"></script>
+<script>
+'use strict';
+// ---- Audio ----
+// Mix (fixed after playtesting: drums were inaudible, backing too loud):
+//   drum bus  gain 2.0  (+6 dB)  |  music bus gain 0.5 (-6 dB)
+//   => drums sit ~12 dB above the backing track. Ironclad's backing was
+//   ~10 dB hotter than the other three (mean -9.2 dB vs ~-20 dB); see the
+//   round-3 note below — the heavy section is now cut 12 dB in the file
+//   itself and Ironclad's musicGain is 0.5. Other tracks stay at 1.0.
+// Ironclad mix (Nov 11, round 4): Playtesting found the -12 dB cut in
+// track4-quiet.mp3 was too low, so track4-mid.mp3 brings the heavy
+// section (18s+) 3/4 of the way back: only -3 dB below the original
+// (18s+ mean -11.9 dB vs original -8.7 dB, intro untouched at -15.1 dB).
+// The cut is baked into the audio file; there is NO section-flip logic.
+// Ironclad musicGain is 0.5 (intro effective ~-27 dB, in line with the
+// other tracks).
+// A DynamicsCompressor on the master (threshold -6 dB, ratio 12)
+// keeps loud drum hits on top of the backing from clipping; overall
+// peak stays under -1 dB.
+let actx = null, master = null, drumBus = null, musicBus = null, duckGain = null, songBuf = null, drumBufs = {};
+let drumLevel = 1.0, musicLevel = 1.0; // user balance, 0..1.5, from pause-screen sliders
+let currentMusicGain = 1.0; // per-song (Ironclad 0.5, others 1.0)
+const DRUM_BUS_GAIN = 2.0, MUSIC_BUS_GAIN = 0.5;
+function applyMix() {
+  if (drumBus) drumBus.gain.value = DRUM_BUS_GAIN * drumLevel * (track ? (track.drumGain || 1.0) : 1.0);
+  if (musicBus) musicBus.gain.value = MUSIC_BUS_GAIN * musicLevel * currentMusicGain;
+}
+function duckMusic() {
+  // Dip the backing -4 dB for ~150 ms on every drum hit so the hit
+  // punches through (sidechain-style). Runs on its own gain node so it
+  // never fights the section-aware music gain in applyMix().
+  if (!actx || !duckGain) return;
+  const t0 = actx.currentTime;
+  duckGain.gain.cancelScheduledValues(t0);
+  duckGain.gain.setValueAtTime(duckGain.gain.value, t0);
+  duckGain.gain.linearRampToValueAtTime(0.63, t0 + 0.02); // -4 dB
+  duckGain.gain.linearRampToValueAtTime(1.0, t0 + 0.17);
+}
+const DRUM_FILES = { kick:'drums/kick.mp3', snare:'drums/snare.mp3',
+  'hihat-closed':'drums/hihat-closed.mp3', 'hihat-open':'drums/hihat-open.mp3',
+  crash:'drums/crash.mp3', splash:'drums/splash.mp3' };
+const PAD_SAMPLE = { kick:'kick', snare:'snare', hat:'hihat-closed', splash:'splash' };
+// Per-sample gains (measured peaks with ffmpeg volumedetect: kick -10.7 dB,
+// crash -9.4, hihat-open -14.5, snare -23.0, hihat-closed -23.9, splash
+// (trimmed) -6.2 dB — the quiet samples were inaudible next to a -1.3 dB
+// backing track). Gains bring every drum's peak to roughly the kick's
+// level so all four pads cut through equally, before the +6 dB drum bus.
+// Splash: 0.5 brings its -6.2 dB peak to -12.2 dB, in line with the rest.
+const SAMPLE_GAIN = { kick:1.0, snare:3.2, 'hihat-closed':3.5, 'hihat-open':1.6,
+  crash:0.9, splash:0.5 };
+
+async function ensureAudio() {
+  if (actx) { if (actx.state === 'suspended') await actx.resume(); return; }
+  actx = new (window.AudioContext || window.webkitAudioContext)();
+  // master -> limiter -> destination
+  const limiter = actx.createDynamicsCompressor();
+  limiter.threshold.value = -6; limiter.knee.value = 6; limiter.ratio.value = 12;
+  limiter.attack.value = 0.003; limiter.release.value = 0.25;
+  limiter.connect(actx.destination);
+  master = actx.createGain(); master.gain.value = 0.9; master.connect(limiter);
+  drumBus = actx.createGain(); drumBus.connect(master);
+  musicBus = actx.createGain();
+  duckGain = actx.createGain(); duckGain.gain.value = 1.0;
+  musicBus.connect(duckGain); duckGain.connect(master);
+  applyMix();
+  await actx.resume();
+  const load = async (url) => {
+    const r = await fetch(url); const ab = await r.arrayBuffer();
+    return await actx.decodeAudioData(ab);
+  };
+  for (const [k, f] of Object.entries(DRUM_FILES)) drumBufs[k] = await load(f);
+}
+function playSample(name, when) {
+  if (!actx || !drumBufs[name]) return;
+  duckMusic(); // dip the backing so this hit punches through
+  const s = actx.createBufferSource(); s.buffer = drumBufs[name];
+  const g = actx.createGain(); g.gain.value = SAMPLE_GAIN[name] || 1.0;
+  s.connect(g); g.connect(drumBus); s.start(when || actx.currentTime);
+}
+
+// ---- State ----
+let track = null, chart = [], songSource = null, songStartCtx = 0, songStartOffset = 0;
+let playing = false, paused = false, raf = 0;
+let score = 0, combo = 0, maxCombo = 0, counts = { perfect: 0, good: 0, miss: 0 };
+let noteEls = [];
+const LEAD = 1.8; // seconds a note is visible before its hit time
+
+const $ = (id) => document.getElementById(id);
+const highway = $('highway');
+
+// ---- Hit effects (Guitar Hero-style fireworks) ----
+// Lightweight 2D canvas overlay inside the highway. One rAF loop runs
+// only while particles/rings/flashes are alive, so it costs nothing
+// between hits and never touches the audio clock or note timing.
+// Perfect = big firework burst + expanding ring + lane/pad flash.
+// Good   = smaller burst, softer flash. Miss = small grey puff only,
+// so a correct hit vs a miss is instantly readable at a glance.
+// Colours match the pads/notes: kick red, snare gold, hat blue, splash pink.
+const PAD_COLOR = { kick: '#ff5a5a', snare: '#f5c542', hat: '#7fb8ff', splash: '#ff8ad8' };
+const LANE_INDEX = { kick: 0, snare: 1, hat: 2, splash: 3 };
+const fxCanvas = $('fx'), fxCtx = fxCanvas.getContext('2d');
+let fxParts = [], fxRings = [], fxFlashes = [], fxRunning = false, fxLast = 0;
+const FX_MAX_PARTS = 160; // hard cap: keeps 60fps on iPhone even on dense choruses
+function fxResize() {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  fxCanvas.width = Math.max(1, highway.clientWidth * dpr);
+  fxCanvas.height = Math.max(1, highway.clientHeight * dpr);
+  fxCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+window.addEventListener('resize', fxResize);
+function fxStart() {
+  if (fxRunning) return;
+  fxRunning = true; fxLast = performance.now();
+  requestAnimationFrame(fxTick);
+}
+function fxTick(now) {
+  const dt = Math.min(0.05, (now - fxLast) / 1000 || 0.016); fxLast = now;
+  const W = highway.clientWidth, H = highway.clientHeight;
+  fxCtx.clearRect(0, 0, W, H);
+  // lane flash: fading vertical glow in the hit lane
+  fxFlashes = fxFlashes.filter(f => (f.life -= dt) > 0);
+  for (const f of fxFlashes) {
+    const a = f.life / f.max * 0.28;
+    fxCtx.fillStyle = f.color; fxCtx.globalAlpha = a;
+    fxCtx.fillRect(f.lane * W / 4, 0, W / 4, H);
+  }
+  fxCtx.globalAlpha = 1;
+  // expanding rings
+  fxRings = fxRings.filter(r => (r.life -= dt) > 0);
+  for (const r of fxRings) {
+    const p = 1 - r.life / r.max; // 0 -> 1
+    fxCtx.globalAlpha = (1 - p) * 0.9;
+    fxCtx.strokeStyle = r.color; fxCtx.lineWidth = Math.max(1, 5 * (1 - p));
+    fxCtx.beginPath(); fxCtx.arc(r.x, r.y, 6 + p * r.maxR, 0, Math.PI * 2); fxCtx.stroke();
+  }
+  fxCtx.globalAlpha = 1;
+  // sparks: streaks with gravity + drag, plus grey puffs (slow, rising, growing)
+  fxParts = fxParts.filter(p => (p.life -= dt) > 0);
+  for (const p of fxParts) {
+    const px = p.x, py = p.y;
+    p.vy += p.grav * dt; p.vx *= (1 - p.drag * dt); p.vy *= (1 - p.drag * dt * 0.5);
+    p.x += p.vx * dt; p.y += p.vy * dt;
+    const a = Math.max(0, p.life / p.max);
+    if (p.trail) {
+      // trailing sparkle: a tiny 4-point star that twinkles out
+      const s = p.size * (0.6 + 0.4 * a);
+      fxCtx.globalAlpha = a * 0.95; fxCtx.strokeStyle = p.color; fxCtx.lineWidth = Math.max(1, p.size * 0.5);
+      fxCtx.lineCap = 'round';
+      fxCtx.beginPath();
+      fxCtx.moveTo(p.x - s, p.y); fxCtx.lineTo(p.x + s, p.y);
+      fxCtx.moveTo(p.x, p.y - s); fxCtx.lineTo(p.x, p.y + s);
+      fxCtx.stroke();
+      fxCtx.globalAlpha = a; fxCtx.fillStyle = '#ffffff';
+      fxCtx.beginPath(); fxCtx.arc(p.x, p.y, Math.max(0.8, s * 0.3), 0, Math.PI * 2); fxCtx.fill();
+    } else if (p.puff) {
+      fxCtx.globalAlpha = a * 0.45; fxCtx.fillStyle = p.color;
+      fxCtx.beginPath(); fxCtx.arc(p.x, p.y, p.size * (1 + (1 - a) * 1.6), 0, Math.PI * 2); fxCtx.fill();
+    } else {
+      fxCtx.globalAlpha = a; fxCtx.strokeStyle = p.color; fxCtx.lineWidth = p.size;
+      fxCtx.lineCap = 'round';
+      fxCtx.beginPath(); fxCtx.moveTo(px, py); fxCtx.lineTo(p.x, p.y); fxCtx.stroke();
+      // bright core dot
+      fxCtx.globalAlpha = a * 0.9; fxCtx.fillStyle = '#ffffff';
+      fxCtx.beginPath(); fxCtx.arc(p.x, p.y, Math.max(1, p.size * 0.45), 0, Math.PI * 2); fxCtx.fill();
+    }
+  }
+  fxCtx.globalAlpha = 1;
+  if (fxParts.length || fxRings.length || fxFlashes.length) requestAnimationFrame(fxTick);
+  else { fxRunning = false; fxCtx.clearRect(0, 0, W, H); }
+}
+function fxBurst(pad, kind, comboNow) {
+  if (!highway.clientWidth) return;
+  fxResize();
+  const W = highway.clientWidth, H = highway.clientHeight;
+  const lane = LANE_INDEX[pad] ?? 0;
+  const x = (lane + 0.5) * W / 4, y = H * 0.82; // on the gold hit line
+  const color = PAD_COLOR[pad] || '#f5c542';
+  const milestone = kind !== 'miss' && comboNow > 0 && comboNow % 10 === 0;
+  if (kind === 'miss') {
+    // grey puff: 6 slow particles drifting up, no ring, no flash
+    for (let i = 0; i < 6; i++) {
+      fxParts.push({ x: x + (Math.random() - 0.5) * 26, y: y + (Math.random() - 0.5) * 8,
+        vx: (Math.random() - 0.5) * 22, vy: -14 - Math.random() * 22,
+        grav: -8, drag: 1.2, size: 5 + Math.random() * 4, color: '#8d8d9a',
+        life: 0.45, max: 0.45, puff: true });
+    }
+  } else {
+    const big = kind === 'perfect';
+    const n = big ? 26 : 12;
+    // pad flash (colour-matched glow, 180 ms)
+    const padEl = document.querySelector(`#pad-${pad}`);
+    if (padEl) {
+      padEl.classList.add('hitflash');
+      padEl.style.boxShadow = `0 0 26px ${color}, 0 0 8px #fff inset`;
+      setTimeout(() => { padEl.classList.remove('hitflash'); padEl.style.boxShadow = ''; }, 180);
+    }
+    fxFlashes.push({ lane, color, life: 0.22, max: 0.22 });
+    // firework sparks: radial burst, mixed speeds, white-hot cores
+    for (let i = 0; i < n; i++) {
+      if (fxParts.length >= FX_MAX_PARTS) break;
+      const ang = Math.random() * Math.PI * 2;
+      const sp = (big ? 150 : 110) + Math.random() * (big ? 260 : 160);
+      fxParts.push({ x, y, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp - 40,
+        grav: 420, drag: 1.6, size: big ? 2.2 + Math.random() * 1.8 : 1.8 + Math.random() * 1.2,
+        color: Math.random() < 0.25 ? '#ffffff' : color,
+        life: big ? 0.5 : 0.35, max: big ? 0.5 : 0.35, puff: false });
+    }
+    // expanding flash ring (gold for Perfect, pad colour for Good)
+    fxRings.push({ x, y, maxR: big ? 64 : 42, life: big ? 0.4 : 0.3, max: big ? 0.4 : 0.3,
+      color: big ? '#ffd95e' : color });
+    if (milestone) {
+      // every 10 combo: extra gold ring + a dozen gold sparks
+      fxRings.push({ x, y, maxR: 92, life: 0.5, max: 0.5, color: '#ffd95e' });
+      for (let i = 0; i < 12; i++) {
+        if (fxParts.length >= FX_MAX_PARTS) break;
+        const ang = Math.random() * Math.PI * 2, sp = 200 + Math.random() * 220;
+        fxParts.push({ x, y, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp - 60,
+          grav: 420, drag: 1.6, size: 2 + Math.random() * 1.5, color: '#ffd95e',
+          life: 0.5, max: 0.5, puff: false });
+      }
+    }
+  }
+  fxStart();
+}
+
+// ---- Note trails (Nov 11, Playtest note: notes were "just ovals" — now each
+// falling note leaves a fading trail of sparkles + a wisp of smoke
+// behind it, i.e. above it, as it travels down the highway) ----
+// Per-pad icons drawn inside the fancy note discs (see startSong).
+const NOTE_ICON = { kick: '🥁', snare: '✦', hat: '◎', splash: '✹' };
+let fxFrame = 0;
+const FX_TRAIL_MAX = 80; // trail particles only (separate from the 160 burst cap)
+function fxTrailForNote(pad, x, y) {
+  // x,y = note centre. Trail spawns just above the note (behind it)
+  // and drifts gently upward as it fades, so it reads as a wake.
+  let trailCount = 0;
+  for (const p of fxParts) if (p.trail || p.smoke) trailCount++;
+  if (trailCount >= FX_TRAIL_MAX) return;
+  const color = PAD_COLOR[pad] || '#f5c542';
+  const tx = x + (Math.random() - 0.5) * 34;
+  const ty = y - 14 - Math.random() * 18;
+  // sparkle: tiny 4-point star, pad colour or white
+  fxParts.push({ x: tx, y: ty, vx: (Math.random() - 0.5) * 12, vy: -16 - Math.random() * 22,
+    grav: -18, drag: 1.0, size: 2 + Math.random() * 2.2,
+    color: Math.random() < 0.5 ? '#ffffff' : color,
+    life: 0.35 + Math.random() * 0.15, max: 0.5, trail: true, puff: false });
+  // smoke wisp: about 1 in 4 trail spawns, a slow pale puff
+  if (Math.random() < 0.25 && trailCount < FX_TRAIL_MAX - 1) {
+    fxParts.push({ x: tx, y: ty + 4, vx: (Math.random() - 0.5) * 8, vy: -10 - Math.random() * 10,
+      grav: -6, drag: 1.2, size: 4 + Math.random() * 3, color: '#cfc8e0',
+      life: 0.5, max: 0.5, trail: false, puff: true, smoke: true });
+  }
+  fxStart();
+}
+
+// ---- Select screen ----
+const list = $('trackList');
+TRACKS.forEach(t => {
+  const b = document.createElement('button');
+  b.className = 'track';
+  b.innerHTML = `<span class="diff ${t.difficulty.toLowerCase()}">${t.difficulty}</span>
+    <div class="name">${t.id}. ${t.title}</div>
+    <div class="meta">${t.tag} · ${t.bpm} BPM · ${Math.floor(t.duration / 60)}:${String(Math.round(t.duration % 60)).padStart(2, '0')}</div>
+    <span class="playchip">▶ PLAY</span>`;
+  b.onclick = () => startSong(t);
+  list.appendChild(b);
+});
+document.querySelectorAll('#padtest button').forEach(b => {
+  b.addEventListener('pointerdown', async (e) => { e.preventDefault(); await ensureAudio(); playSample(PAD_SAMPLE[b.dataset.pad]); });
+});
+$('ctaPlay').onclick = () => startSong(TRACKS[1]); // Cathedral Rain, Easy — recommended first song
+// Pause-screen mix sliders (drums / music balance, live)
+function bindMix(id, valId, set) {
+  $(id).addEventListener('input', (e) => { const v = +e.target.value / 100; $(valId).textContent = e.target.value + '%'; set(v); applyMix(); });
+}
+bindMix('drumVol', 'drumVolVal', v => drumLevel = v);
+bindMix('musicVol', 'musicVolVal', v => musicLevel = v);
+
+// ---- Game ----
+async function startSong(t) {
+  await ensureAudio();
+  track = t;
+  chart = buildChart(t);
+  // decode backing track (cache per track id)
+  if (!startSong.cache) startSong.cache = {};
+  if (!startSong.cache[t.id]) {
+    const r = await fetch(t.file); startSong.cache[t.id] = await actx.decodeAudioData(await r.arrayBuffer());
+  }
+  songBuf = startSong.cache[t.id];
+  score = 0; combo = 0; maxCombo = 0; counts = { perfect: 0, good: 0, miss: 0 };
+  $('score').textContent = '0'; $('combo').textContent = '0'; $('acc').textContent = '100% acc';
+  $('judge').textContent = '';
+  $('songtitle').textContent = `${t.title} · ${t.bpm} BPM`;
+  currentMusicGain = t.musicGain || 1.0; // Ironclad 0.5, others 1.0 (no section flip — the heavy cut is in the file)
+  applyMix(); // per-track music/drum gains
+  $('select').classList.add('hidden'); $('game').classList.remove('hidden');
+  $('resultOverlay').classList.add('hidden'); $('pauseOverlay').classList.add('hidden');
+  fxResize(); // highway now has layout, so the FX canvas can size itself
+  // build note elements
+  highway.querySelectorAll('.note').forEach(n => n.remove());
+  noteEls = chart.map(n => {
+    const el = document.createElement('div');
+    el.className = 'note ' + n.pad;
+    const lane = { kick: 0, snare: 1, hat: 2, splash: 3 }[n.pad];
+    el.style.left = `calc(${lane * 25}% + 5px)`;
+    const icon = document.createElement('span');
+    icon.textContent = NOTE_ICON[n.pad] || '●';
+    el.appendChild(icon);
+    highway.appendChild(el);
+    return el;
+  });
+  // countdown then go
+  $('judge').textContent = 'Ready…'; $('judge').className = 'perfect';
+  setTimeout(() => { if (track === t && !$('game').classList.contains('hidden')) beginPlayback(); }, 600);
+}
+function beginPlayback() {
+  stopSource();
+  songSource = actx.createBufferSource(); songSource.buffer = songBuf;
+  songSource.connect(musicBus);
+  songStartOffset = 0; songStartCtx = actx.currentTime + 0.15;
+  songSource.start(songStartCtx);
+  songSource.onended = () => { if (playing) endSong(); };
+  playing = true; paused = false;
+  $('judge').textContent = ''; $('judge').className = '';
+  cancelAnimationFrame(raf); raf = requestAnimationFrame(tick);
+}
+function songTime() { return actx ? actx.currentTime - songStartCtx + songStartOffset : 0; }
+function stopSource() { if (songSource) { try { songSource.onended = null; songSource.stop(); } catch (e) {} songSource = null; } }
+
+function tick() {
+  if (!playing) return;
+  const t = songTime();
+  const H = highway.clientHeight, hitY = H * 0.82;
+  fxFrame++;
+  const spawnTrail = fxFrame % 3 === 0; // 1 trail spawn per visible note every 3rd frame (~20/s/note)
+  for (let i = 0; i < chart.length; i++) {
+    const n = chart[i], el = noteEls[i];
+    const dt = n.t - t; // >0 = still coming
+    if (dt > LEAD || dt < -0.25) { el.style.display = 'none'; }
+    else {
+      const noteY = hitY - dt / LEAD * (hitY + 40);
+      el.style.display = 'block'; el.style.top = noteY + 'px';
+      // trailing sparkles + smoke behind the falling note (visual only)
+      if (spawnTrail && !n.judged && dt > -0.1) {
+        const lane = LANE_INDEX[n.pad] ?? 0;
+        fxTrailForNote(n.pad, (lane + 0.5) * highway.clientWidth / 4, noteY);
+      }
+    }
+    if (!n.judged && dt < -0.14) { judgeNote(n, el, 'miss'); }
+  }
+  $('progress').style.width = Math.min(100, t / track.duration * 100) + '%';
+  if (t >= track.duration + 0.5) { endSong(); return; }
+  raf = requestAnimationFrame(tick);
+}
+
+function judgeNote(n, el, kind) {
+  n.judged = true;
+  if (el) el.classList.add('hit');
+  const j = $('judge');
+  if (kind === 'perfect') { counts.perfect++; score += 300; combo++; j.textContent = 'PERFECT'; j.className = 'perfect'; }
+  else if (kind === 'good') { counts.good++; score += 100; combo++; j.textContent = 'GOOD'; j.className = 'good'; }
+  else { counts.miss++; combo = 0; j.textContent = 'MISS'; j.className = 'miss'; }
+  if (combo > maxCombo) maxCombo = combo;
+  fxBurst(n.pad, kind, combo); // fireworks on the hit line (grey puff on miss)
+  $('score').textContent = score; $('combo').textContent = combo;
+  const total = counts.perfect + counts.good + counts.miss;
+  $('acc').textContent = total ? Math.round((counts.perfect + counts.good * 0.5) / total * 100) + '% acc' : '100% acc';
+}
+
+function tapPad(pad) {
+  const el = document.querySelector(`#pad-${pad}`);
+  if (el) { el.classList.add('pressed'); setTimeout(() => el.classList.remove('pressed'), 120); }
+  if (!actx) return;
+  playSample(PAD_SAMPLE[pad]);
+  if (!playing || paused) return;
+  const t = songTime();
+  // nearest unjudged note on this pad within the hit window
+  let best = null, bestDt = 1e9;
+  for (const n of chart) {
+    if (n.judged || n.pad !== pad) continue;
+    const dt = Math.abs(n.t - t);
+    if (dt < bestDt) { bestDt = dt; best = n; }
+    if (n.t > t + 0.2) break;
+  }
+  if (best && bestDt <= 0.14) {
+    const idx = chart.indexOf(best);
+    judgeNote(best, noteEls[idx], bestDt <= 0.07 ? 'perfect' : 'good');
+  }
+  // otherwise: free-play tap — drum sound only, no penalty
+}
+document.querySelectorAll('#pads .pad').forEach(b => {
+  b.addEventListener('pointerdown', (e) => { e.preventDefault(); tapPad(b.dataset.pad); });
+});
+
+function endSong() {
+  if (!playing) return;
+  playing = false; cancelAnimationFrame(raf); stopSource();
+  // unhit notes count as misses
+  chart.forEach(n => { if (!n.judged) counts.miss++; });
+  const total = counts.perfect + counts.good + counts.miss;
+  const acc = total ? (counts.perfect + counts.good * 0.5) / total : 0;
+  const grade = acc >= 0.95 ? 'S' : acc >= 0.85 ? 'A' : acc >= 0.7 ? 'B' : acc >= 0.5 ? 'C' : 'D';
+  $('resultTitle').textContent = track.title + ' — complete!';
+  $('resultGrade').textContent = grade;
+  $('resultStats').innerHTML =
+    `Score: <b>${score}</b><br>Perfect: <b>${counts.perfect}</b> · Good: <b>${counts.good}</b> · Miss: <b>${counts.miss}</b><br>` +
+    `Max combo: <b>${maxCombo}</b> · Accuracy: <b>${Math.round(acc * 100)}%</b>`;
+  $('resultOverlay').classList.remove('hidden');
+}
+
+// ---- Pause / navigation ----
+$('pauseBtn').onclick = () => {
+  if (!playing) return;
+  paused = true; actx.suspend();
+  $('pauseText').textContent = track.title + ' — paused. Your place is saved.';
+  $('pauseOverlay').classList.remove('hidden');
+};
+$('resumeBtn').onclick = async () => { $('pauseOverlay').classList.add('hidden'); paused = false; await actx.resume(); };
+$('restartBtn').onclick = () => { $('pauseOverlay').classList.add('hidden'); paused = false; actx.resume(); startSong(track); };
+$('quitBtn').onclick = () => {
+  playing = false; paused = false; cancelAnimationFrame(raf); stopSource();
+  if (actx) actx.resume();
+  $('pauseOverlay').classList.add('hidden'); $('game').classList.add('hidden'); $('select').classList.remove('hidden');
+};
+$('againBtn').onclick = () => { $('resultOverlay').classList.add('hidden'); startSong(track); };
+$('songsBtn').onclick = () => {
+  playing = false; cancelAnimationFrame(raf); stopSource();
+  $('resultOverlay').classList.add('hidden'); $('game').classList.add('hidden'); $('select').classList.remove('hidden');
+};
+// keep the screen awake while playing
+let wakeLock = null;
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && playing && !paused && navigator.wakeLock) navigator.wakeLock.request('screen').then(l => wakeLock = l).catch(() => {});
+});
+</script>
+</body>
+</html>
