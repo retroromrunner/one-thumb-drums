@@ -1,18 +1,20 @@
-// Drum chart data + generation for the One-Thumb Drum game.
+// Drum chart data + generation for Dream in Music (AI Jam #7 entry).
+// Built in-window Nov 13, 2026 from the One-Thumb drum engine + songs (prep).
+// Same charts and audio — each song is now one dream.
 // Shared by index.html (browser) and node test harness (module.exports).
 const TRACKS = [
-  { id: 1, title: 'Iron Pulse', file: 'songs/track1.mp3', bpm: 120, duration: 136.0,
+  { id: 1, title: 'Dream II · Iron Pulse', file: 'songs/track1.mp3', bpm: 120, duration: 136.0,
     difficulty: 'Medium', tag: 'Driving rock · Em–C–G–D', musicGain: 1.0,
     sections: [[16,'intro'],[32,'verse'],[48,'pre'],[80,'chorus'],[96,'interlude'],[128,'chorus'],[136,'ending']] },
-  { id: 2, title: 'Cathedral Rain', file: 'songs/track2.mp3', bpm: 100, duration: 134.4,
+  { id: 2, title: 'Dream I · Cathedral Rain', file: 'songs/track2.mp3', bpm: 100, duration: 134.4,
     difficulty: 'Easy', tag: 'Dark / goth · Am–F–C–G', musicGain: 1.0,
     sections: [[19,'intro'],[38,'verse'],[58,'pre'],[86,'chorus'],[106,'interlude'],[125,'chorus'],[134.4,'ending']] },
-  { id: 3, title: 'Night Shift', file: 'songs/track3.mp3', bpm: 140, duration: 123.4,
+  { id: 3, title: 'Dream III · Night Shift', file: 'songs/track3.mp3', bpm: 140, duration: 123.4,
     difficulty: 'Hard', tag: 'Fast Phrygian metal · F#m–G–A–E', musicGain: 1.0,
     sections: [[14,'intro'],[27,'verse'],[41,'pre'],[69,'chorus'],[82,'interlude'],[110,'chorus'],[123.4,'ending']] },
-  { id: 4, title: 'Ironclad', file: 'songs/track4-mid.mp3', bpm: 156, duration: 123.1,
+  { id: 4, title: 'Dream IV · Ironclad', file: 'songs/track4-mid.mp3', bpm: 156, duration: 123.1,
     difficulty: 'Expert', tag: 'Heavy metal · B harmonic minor · clean intro, heavy after 0:18',
-    // FILE-LEVEL mix (Nov 11, round 4): Playtesting found the -12 dB cut in
+    // FILE-LEVEL mix (Nov 11, round 4): Cori said the -12 dB cut in
     // track4-quiet.mp3 was too much, so the heavy section (18s+) in
     // track4-mid.mp3 is only -3 dB below the original (mean ~-11.7 dB),
     // i.e. 3/4 of the way back up. Intro 0-18s untouched. musicGain 0.5
@@ -31,7 +33,7 @@ function sectionKindAt(track, t) {
 //   0 kick, 1 hat, 2 snare, 3 hat, 4 kick, 5 hat, 6 snare, 7 hat
 // Fast tracks (>=140 BPM) drop to quarter-note core + sparse hats,
 // because eighths at 156 BPM are ~192 ms apart.
-// SPLASH is OPTIONAL (Nov 11, Playtesting changed the call): no splash notes
+// SPLASH is OPTIONAL (Nov 11, Cori changed her mind): no splash notes
 // are generated in any chart — the SPLASH pad stays as a free-play pad
 // (tap anytime, plays the cymbal, no penalty/score). Charts are kick /
 // snare / hat only. Slot 6 in fill bars is a snare, as elsewhere.

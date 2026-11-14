@@ -4,31 +4,48 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>One-Thumb Drums</title>
+<title>Dream in Music — a lucid drumming dream</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  html, body { height:100%; overflow:hidden; background:#0d0a14; }
+  html, body { height:100%; overflow:hidden; background:#12082e; }
   body {
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
     color:#f5efff; touch-action:none; user-select:none; -webkit-user-select:none;
     overscroll-behavior:none;
   }
-  #app { height:100dvh; display:flex; flex-direction:column; max-width:480px; margin:0 auto;
+  #app { height:100dvh; display:flex; flex-direction:column; max-width:480px; margin:0 auto; position:relative;
     padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-    background:linear-gradient(180deg,#17102a 0%,#0d0a14 60%,#1a0f1e 100%); }
+    background:linear-gradient(180deg,#150a38 0%,#241145 55%,#3d1e63 100%); }
   .hidden { display:none !important; }
   button { font-family:inherit; }
+
+
+  /* ---- Dream FX (AI Jam #7): twinkling stars, rainbow swirls, drifting clouds ---- */
+  #dreamfx { position:absolute; inset:0; overflow:hidden; pointer-events:none; z-index:0; }
+  #select, #game { position:relative; z-index:1; }
+  .swirl { position:absolute; border-radius:50%; filter:blur(34px); }
+  .swirl.a { width:340px; height:340px; top:-90px; right:-90px;
+    background:conic-gradient(from 0deg, rgba(255,120,180,.28), rgba(255,220,120,.22), rgba(120,220,255,.22), rgba(180,120,255,.28), rgba(255,120,180,.28));
+    animation:spin 70s linear infinite; }
+  .swirl.b { width:280px; height:280px; bottom:-70px; left:-80px;
+    background:conic-gradient(from 180deg, rgba(120,220,255,.22), rgba(180,120,255,.24), rgba(255,150,200,.20), rgba(120,220,255,.22));
+    animation:spin 90s linear infinite reverse; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .star { position:absolute; border-radius:50%; background:#fff; animation:twinkle 2.8s ease-in-out infinite; }
+  @keyframes twinkle { 0%,100% { opacity:.15; transform:scale(.7); } 50% { opacity:1; transform:scale(1.15); } }
+  .cloud { position:absolute; opacity:.5; animation:drift linear infinite; }
+  @keyframes drift { from { transform:translateX(-70px); } to { transform:translateX(110vw); } }
 
   /* ---- Select screen ---- */
   #select { flex:1; display:flex; flex-direction:column; padding:14px 16px 12px; overflow-y:auto; }
   .hero { text-align:center; padding:6px 0 2px; position:relative; }
   .hero .notes { font-size:22px; letter-spacing:14px; color:#f5c542; opacity:.9; animation:float 2.4s ease-in-out infinite; }
   @keyframes float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-5px); } }
-  .hero .drumart { font-size:64px; line-height:1; margin:2px 0 0; filter:drop-shadow(0 0 18px rgba(245,197,66,.45)); }
+  .hero .drumart { font-size:64px; line-height:1; margin:2px 0 0; filter:drop-shadow(0 0 18px rgba(180,140,255,.55)); }
   #select h1 { font-size:44px; line-height:.95; letter-spacing:1px; text-align:center; margin:4px 0 2px; font-weight:900;
-    background:linear-gradient(180deg,#fff 20%,#f5c542 60%,#ff7a3d 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
-    filter:drop-shadow(0 3px 0 rgba(0,0,0,.45)) drop-shadow(0 0 22px rgba(245,197,66,.25)); }
-  #select h1 span { -webkit-text-fill-color:#ff5a5a; }
+    background:linear-gradient(180deg,#fff 15%,#e9d5ff 40%,#ff9ad5 75%,#7fb8ff 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+    filter:drop-shadow(0 3px 0 rgba(0,0,0,.45)) drop-shadow(0 0 22px rgba(180,140,255,.35)); }
+  #select h1 span { -webkit-text-fill-color:#ff9ad5; }
   #select .sub { text-align:center; color:#e8ddff; font-size:15px; margin:6px 0 12px; line-height:1.45; }
   #select .sub b { color:#f5c542; }
   #ctaPlay { display:block; width:100%; padding:16px; border:none; border-radius:18px; cursor:pointer;
@@ -49,7 +66,9 @@
   .howto b { color:#f5c542; }
   #select .credit { text-align:center; color:#8d7bb0; font-size:11.5px; margin-top:12px; line-height:1.5; }
   #padtest { display:flex; gap:8px; margin-top:12px; }
-  #padtest button { flex:1; padding:12px 0; border-radius:12px; border:1px solid #3d2a66; background:#1d1430; color:#f5efff; font-size:14px; font-weight:700; }
+  #padtest button { position:relative; flex:1; padding:12px 0; border-radius:12px; border:1px solid #3d2a66; background:#1d1430; color:#f5efff; font-size:14px; font-weight:700; }
+  .key { position:absolute; top:5px; right:7px; font-size:11px; font-weight:800; padding:1px 6px; border-radius:6px; background:rgba(255,255,255,.16); color:#fff; opacity:.9; }
+  #padtest .key { top:4px; right:5px; font-size:10px; }
   .mixrow { display:flex; align-items:center; gap:10px; margin:10px 0 2px; font-size:14px; text-align:left; }
   .mixrow label { width:64px; font-weight:700; }
   .mixrow input[type=range] { flex:1; accent-color:#f5c542; }
@@ -68,13 +87,19 @@
   #judge { text-align:center; height:26px; font-size:20px; font-weight:800; letter-spacing:1px; }
   #judge.perfect { color:#7fd08a; } #judge.good { color:#f5c542; } #judge.miss { color:#ff5a5a; }
   #highway { position:relative; flex:1; margin:0 14px; border-radius:14px; overflow:hidden;
-    background:linear-gradient(180deg,#120d20,#1d1430); border:1px solid #2c2145; }
+    background:
+      radial-gradient(ellipse 65% 32% at 50% 0%, rgba(255,240,180,.20), transparent),
+      radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,.55), transparent),
+      radial-gradient(1px 1px at 70% 60%, rgba(255,255,255,.4), transparent),
+      radial-gradient(1.5px 1.5px at 45% 80%, rgba(255,255,255,.45), transparent),
+      radial-gradient(1px 1px at 85% 20%, rgba(255,255,255,.5), transparent),
+      linear-gradient(180deg,#170c33,#2a1850); border:1px solid #4a2f7a; }
   .lane { position:absolute; top:0; bottom:0; border-left:1px solid rgba(255,255,255,.05); z-index:0; }
   .lane:first-child { border-left:none; }
   .lane span { position:absolute; top:6px; left:0; right:0; text-align:center; font-size:10px; font-weight:800; letter-spacing:2px; opacity:.55; }
-  /* Fancy notes (Nov 11, Playtest note: "just ovals" — now glossy drum-head
-     discs with a rim, 3D gradient, glow and a per-pad icon) */
-  .note { position:absolute; width:calc(25% - 10px); left:5px; height:30px; border-radius:15px;
+  /* Dream notes (AI Jam #7): falling notes are dream fragments —
+     soft clouds, glossy with a rim, 3D gradient, glow and a cloud icon */
+  .note { position:absolute; width:calc(25% - 10px); left:5px; height:30px; border-radius:50% 50% 50% 50% / 72% 72% 28% 28%;
     transform:translateY(-50%); display:flex; align-items:center; justify-content:center;
     font-size:15px; line-height:1; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.65);
     border:2px solid rgba(255,255,255,.9);
@@ -92,14 +117,13 @@
   .note.hit { opacity:0; }
   #hitline { position:absolute; left:0; right:0; height:4px; background:#f5c542;
     box-shadow:0 0 12px #f5c542; bottom:18%; }
-  #hitline::after { content:'HIT'; position:absolute; right:8px; top:-18px; font-size:10px; color:#f5c542; letter-spacing:2px; }
+  #hitline::after { content:'DREAM'; position:absolute; right:8px; top:-18px; font-size:10px; color:#f5c542; letter-spacing:2px; }
   /* Hit-effect canvas: fireworks/sparks drawn over the highway, under the pads */
   #fx { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:5; }
   .note { z-index:2; } #hitline { z-index:3; }
   #pads { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; padding:10px 14px calc(10px + env(safe-area-inset-bottom)); }
-  .pad { height:96px; border-radius:18px; border:2px solid rgba(255,255,255,.25); color:#fff;
+  .pad { position:relative; height:96px; border-radius:18px; border:2px solid rgba(255,255,255,.25); color:#fff;
     font-size:17px; font-weight:800; letter-spacing:.5px; touch-action:none; }
-  .pad small { display:block; font-size:11px; font-weight:600; opacity:.75; margin-top:2px; }
   .pad:active, .pad.pressed { transform:scale(.94); filter:brightness(1.4); }
   /* Brief flash when its lane scores a hit — colour set inline per pad */
   .pad.hitflash { filter:brightness(1.9) saturate(1.3); }
@@ -124,29 +148,40 @@
 </head>
 <body>
 <div id="app">
+  <!-- Dream FX: rainbow swirls, twinkling stars (JS), drifting clouds -->
+  <div id="dreamfx" aria-hidden="true">
+    <div class="swirl a"></div><div class="swirl b"></div>
+    <div id="starfield"></div>
+    <span class="cloud" style="top:9%; font-size:30px; animation-duration:58s; animation-delay:-8s; opacity:.45;">☁️</span>
+    <span class="cloud" style="top:22%; font-size:22px; animation-duration:74s; animation-delay:-40s; opacity:.35;">☁️</span>
+    <span class="cloud" style="top:64%; font-size:34px; animation-duration:66s; animation-delay:-25s; opacity:.4;">☁️</span>
+    <span class="cloud" style="top:82%; font-size:20px; animation-duration:82s; animation-delay:-60s; opacity:.3;">☁️</span>
+  </div>
   <!-- SELECT -->
   <div id="select">
     <div class="hero">
-      <div class="notes">♪&nbsp;&nbsp;♫&nbsp;&nbsp;♪</div>
-      <div class="drumart">🥁</div>
-      <h1>ONE-THUMB<br><span>DRUMS</span></h1>
-      <div class="sub">The backing track has no drums.<br><b>You</b> are the drummer.</div>
+      <div class="notes">🎭&nbsp;&nbsp;☁️&nbsp;&nbsp;♪&nbsp;&nbsp;☁️&nbsp;&nbsp;♫&nbsp;&nbsp;☁️&nbsp;&nbsp;🎭</div>
+      <div class="drumart">🌙</div>
+      <h1>DREAM<br><span>IN MUSIC</span></h1>
+      <div class="sub">You're dreaming — and you're <b>on stage</b>. The band has no drummer,<br>the spotlight is on <b>you</b>. Keep the beat, don't wake up.</div>
     </div>
-    <button id="ctaPlay">▶&nbsp; TAP TO PLAY<small>Start with Cathedral Rain · Easy · 100 BPM</small></button>
-    <h2 class="songshead">— CHOOSE YOUR SONG —</h2>
+    <button id="ctaPlay">▶&nbsp; TAP TO DREAM<small>Start with Dream I · Cathedral Rain · Easy · 100 BPM</small></button>
+    <h2 class="songshead">— TONIGHT'S SETLIST —</h2>
     <div id="trackList"></div>
     <div class="howto">
-      <div>🎵 <b>Notes fall</b> down the highway — watch the gold line</div>
-      <div>👆 <b>Tap the matching pad</b> (Kick · Snare · Hi-Hat) right as a note crosses it — Splash is optional, tap it anytime</div>
-      <div>⭐ <b>Perfect</b> ±70 ms = 300 pts · <b>Good</b> ±140 ms = 100 pts · Miss breaks your combo</div>
+      <div>☁️ <b>Dream fragments drift down</b> like clouds — watch the gold line</div>
+      <div>👆 <b>Tap the matching pad</b> (Kick · Snare · Hi-Hat) just as a cloud crosses the line — Stardust is optional, tap it anytime</div>
+      <div>⭐ <b>Perfect</b> ±70 ms = 300 pts · <b>Good</b> ±140 ms = 100 pts · A miss stirs you awake and breaks your combo</div>
+      <div>⌨️ <b>Desktop:</b> D F J K (or 1–4) play the pads · Space starts · P pauses</div>
+      <div>🎭 <b>The stage is a dream</b> — every song is one dream, and you're the drummer in the spotlight</div>
     </div>
     <div id="padtest">
-      <button data-pad="kick">🥁 Kick</button>
-      <button data-pad="snare">🥁 Snare</button>
-      <button data-pad="hat">🥁 Hat</button>
-      <button data-pad="splash">🥁 Splash</button>
+      <button data-pad="kick"><span class="key">D</span>🥁 Kick</button>
+      <button data-pad="snare"><span class="key">F</span>🥁 Snare</button>
+      <button data-pad="hat"><span class="key">J</span>🥁 Hat</button>
+      <button data-pad="splash"><span class="key">K</span>🥁 Splash</button>
     </div>
-    <div class="credit">Tap the pads above to hear the drums.<br>Music: original CC0 tracks · Drums: real CC0 samples</div>
+    <div class="credit">Tap the pads above to hear the drums.<br>Original CC0 songs · real CC0 drum samples · a dream on stage for AI Jam #7 — themes DREAM + STAGE</div>
   </div>
 
   <!-- GAME -->
@@ -162,47 +197,47 @@
       <div class="lane" style="left:0%;width:25%;background:rgba(255,90,90,.06)"><span style="color:#ff5a5a">KICK</span></div>
       <div class="lane" style="left:25%;width:25%;background:rgba(245,197,66,.06)"><span style="color:#f5c542">SNARE</span></div>
       <div class="lane" style="left:50%;width:25%;background:rgba(127,184,255,.06)"><span style="color:#7fb8ff">HI-HAT</span></div>
-      <div class="lane" style="left:75%;width:25%;background:rgba(255,138,216,.10)"><span style="color:#ff8ad8">SPLASH</span></div>
+      <div class="lane" style="left:75%;width:25%;background:rgba(255,138,216,.10)"><span style="color:#ff8ad8">STARDUST</span></div>
       <div id="hitline"></div></div>
     <div id="pads">
-      <button class="pad" id="pad-kick" data-pad="kick">KICK<small>beat 1 &amp; 3</small></button>
-      <button class="pad" id="pad-snare" data-pad="snare">SNARE<small>beat 2 &amp; 4</small></button>
-      <button class="pad" id="pad-hat" data-pad="hat">HI-HAT<small>off-beats</small></button>
-      <button class="pad" id="pad-splash" data-pad="splash">SPLASH<small>optional · free play</small></button>
+      <button class="pad" id="pad-kick" data-pad="kick"><span class="key">D</span>KICK</button>
+      <button class="pad" id="pad-snare" data-pad="snare"><span class="key">F</span>SNARE</button>
+      <button class="pad" id="pad-hat" data-pad="hat"><span class="key">J</span>HI-HAT</button>
+      <button class="pad" id="pad-splash" data-pad="splash"><span class="key">K</span>STARDUST</button>
     </div>
   </div>
 </div>
 
 <!-- PAUSE -->
 <div id="pauseOverlay" class="overlay hidden"><div class="card">
-  <h2>Paused</h2><p id="pauseText"></p>
+  <h2>Paused — still dreaming</h2><p id="pauseText"></p>
   <div class="mixrow"><label>🥁 Drums</label><input type="range" id="drumVol" min="0" max="150" value="100"><span id="drumVolVal">100%</span></div>
   <div class="mixrow"><label>🎵 Music</label><input type="range" id="musicVol" min="0" max="150" value="100"><span id="musicVolVal">100%</span></div>
   <button class="btn" id="resumeBtn">▶ Resume</button>
-  <button class="btn ghost" id="restartBtn">↻ Restart song</button>
-  <button class="btn ghost" id="quitBtn">✕ Back to songs</button>
+  <button class="btn ghost" id="restartBtn">↻ Restart dream</button>
+  <button class="btn ghost" id="quitBtn">✕ Back to dreams</button>
 </div></div>
 
 <!-- RESULTS -->
 <div id="resultOverlay" class="overlay hidden"><div class="card">
-  <h2 id="resultTitle">Song complete!</h2>
+  <h2 id="resultTitle">The dream fades…</h2>
   <div class="big" id="resultGrade">A</div>
   <div class="stats" id="resultStats"></div>
-  <button class="btn" id="againBtn">↻ Play again</button>
-  <button class="btn ghost" id="songsBtn">🎵 Choose another song</button>
+  <button class="btn" id="againBtn">↻ Dream again</button>
+  <button class="btn ghost" id="songsBtn">☁️ Choose another dream</button>
 </div></div>
 
-<script src="chart-v3.js?v=4"></script>
+<script src="chart-dream.js?v=1"></script>
 <script>
 'use strict';
 // ---- Audio ----
-// Mix (fixed after playtesting: drums were inaudible, backing too loud):
+// Mix (fixed after Cori's playtest: drums were inaudible, backing too loud):
 //   drum bus  gain 2.0  (+6 dB)  |  music bus gain 0.5 (-6 dB)
 //   => drums sit ~12 dB above the backing track. Ironclad's backing was
 //   ~10 dB hotter than the other three (mean -9.2 dB vs ~-20 dB); see the
 //   round-3 note below — the heavy section is now cut 12 dB in the file
 //   itself and Ironclad's musicGain is 0.5. Other tracks stay at 1.0.
-// Ironclad mix (Nov 11, round 4): Playtesting found the -12 dB cut in
+// Ironclad mix (Nov 11, round 4): Cori said the -12 dB cut in
 // track4-quiet.mp3 was too low, so track4-mid.mp3 brings the heavy
 // section (18s+) 3/4 of the way back: only -3 dB below the original
 // (18s+ mean -11.9 dB vs original -8.7 dB, intro untouched at -15.1 dB).
@@ -333,8 +368,17 @@ function fxTick(now) {
   fxParts = fxParts.filter(p => (p.life -= dt) > 0);
   for (const p of fxParts) {
     const px = p.x, py = p.y;
-    p.vy += p.grav * dt; p.vx *= (1 - p.drag * dt); p.vy *= (1 - p.drag * dt * 0.5);
-    p.x += p.vx * dt; p.y += p.vy * dt;
+    if (p.swirl) {
+      // rainbow-swirl blast particle: orbits the blast centre on a
+      // widening spiral (angle advances, radius grows), so the burst
+      // reads as a swirl, not a plain radial explosion.
+      p.ang += p.angVel * dt; p.rad += p.radVel * dt;
+      p.x = p.cx + Math.cos(p.ang) * p.rad;
+      p.y = p.cy + Math.sin(p.ang) * p.rad * 0.85;
+    } else {
+      p.vy += p.grav * dt; p.vx *= (1 - p.drag * dt); p.vy *= (1 - p.drag * dt * 0.5);
+      p.x += p.vx * dt; p.y += p.vy * dt;
+    }
     const a = Math.max(0, p.life / p.max);
     if (p.trail) {
       // trailing sparkle: a tiny 4-point star that twinkles out
@@ -418,11 +462,54 @@ function fxBurst(pad, kind, comboNow) {
   fxStart();
 }
 
-// ---- Note trails (Nov 11, Playtest note: notes were "just ovals" — now each
+// ---- Stardust rainbow-swirl blast (Nov 13, Cori) ----
+// The Stardust pad is optional free play, so its tap gets a second,
+// bigger job: a rainbow swirl blast in the CENTRE of the highway,
+// distinct from the normal Perfect/Good hit bursts (which are small,
+// lane-coloured, and sit on the gold hit line). ~44 rainbow sparks
+// spiral outward on a widening spiral + ~16 gold/silver stardust
+// sparkles drift out slowly + two expanding rings, all centred at
+// mid-highway. Lifetime ~0.9–1.1 s, capped by FX_MAX_PARTS, so it
+// can't lag the phone or hide falling notes for long.
+const RAINBOW = ['#ff5a5a', '#ff9a3d', '#ffd95e', '#7fd08a', '#7fb8ff', '#b48cff', '#ff8ad8'];
+function fxStardustBlast() {
+  if (!highway.clientWidth) return;
+  fxResize();
+  const W = highway.clientWidth, H = highway.clientHeight;
+  const cx = W / 2, cy = H * 0.45; // centre of the game area, above the hit line
+  // two expanding rings: gold, then pink
+  fxRings.push({ x: cx, y: cy, maxR: 110, life: 0.7, max: 0.7, color: '#ffd95e' });
+  fxRings.push({ x: cx, y: cy, maxR: 150, life: 0.9, max: 0.9, color: '#ff8ad8' });
+  // rainbow spiral: 7 arms, one per rainbow colour, particles start
+  // near the centre and spiral outward as their radius grows.
+  for (let i = 0; i < 42; i++) {
+    if (fxParts.length >= FX_MAX_PARTS) break;
+    const arm = i % 7;
+    const ang0 = arm * Math.PI * 2 / 7 + Math.random() * 0.5;
+    const life = 0.9 + Math.random() * 0.2;
+    fxParts.push({ x: cx, y: cy, cx, cy, ang: ang0, rad: 6 + Math.random() * 14,
+      angVel: 5 + Math.random() * 3.5, radVel: 95 + Math.random() * 65,
+      vx: 0, vy: 0, grav: 0, drag: 0, size: 2 + Math.random() * 1.6,
+      color: RAINBOW[arm], life, max: life, trail: true, puff: false, swirl: true });
+  }
+  // gold / silver / white stardust sparkles drifting out slowly
+  const DUST = ['#ffd95e', '#ffffff', '#e8e8f0'];
+  for (let i = 0; i < 16; i++) {
+    if (fxParts.length >= FX_MAX_PARTS) break;
+    const ang = Math.random() * Math.PI * 2, sp = 30 + Math.random() * 70;
+    const life = 0.9 + Math.random() * 0.2;
+    fxParts.push({ x: cx, y: cy, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp - 20,
+      grav: -12, drag: 1.0, size: 1.8 + Math.random() * 2,
+      color: DUST[i % 3], life, max: life, trail: true, puff: false });
+  }
+  fxStart();
+}
+
+// ---- Note trails (Nov 11, Cori: notes were "just ovals" — now each
 // falling note leaves a fading trail of sparkles + a wisp of smoke
 // behind it, i.e. above it, as it travels down the highway) ----
 // Per-pad icons drawn inside the fancy note discs (see startSong).
-const NOTE_ICON = { kick: '🥁', snare: '✦', hat: '◎', splash: '✹' };
+const NOTE_ICON = { kick: '☁️', snare: '☁️', hat: '☁️', splash: '✦' }; // notes fall as clouds; splash is a star (stardust)
 let fxFrame = 0;
 const FX_TRAIL_MAX = 80; // trail particles only (separate from the 160 burst cap)
 function fxTrailForNote(pad, x, y) {
@@ -448,20 +535,37 @@ function fxTrailForNote(pad, x, y) {
   fxStart();
 }
 
+// ---- Dream FX: scatter twinkling stars across the night sky ----
+(function () {
+  const field = document.getElementById('starfield');
+  if (!field) return;
+  for (let i = 0; i < 55; i++) {
+    const s = document.createElement('span');
+    s.className = 'star';
+    const size = 1 + Math.random() * 2.2;
+    s.style.width = s.style.height = size.toFixed(1) + 'px';
+    s.style.left = (Math.random() * 100).toFixed(1) + '%';
+    s.style.top = (Math.random() * 100).toFixed(1) + '%';
+    s.style.animationDelay = (Math.random() * 2.8).toFixed(2) + 's';
+    s.style.animationDuration = (2 + Math.random() * 2.4).toFixed(2) + 's';
+    field.appendChild(s);
+  }
+})();
+
 // ---- Select screen ----
 const list = $('trackList');
 TRACKS.forEach(t => {
   const b = document.createElement('button');
   b.className = 'track';
   b.innerHTML = `<span class="diff ${t.difficulty.toLowerCase()}">${t.difficulty}</span>
-    <div class="name">${t.id}. ${t.title}</div>
+    <div class="name">${t.title}</div>
     <div class="meta">${t.tag} · ${t.bpm} BPM · ${Math.floor(t.duration / 60)}:${String(Math.round(t.duration % 60)).padStart(2, '0')}</div>
     <span class="playchip">▶ PLAY</span>`;
   b.onclick = () => startSong(t);
   list.appendChild(b);
 });
 document.querySelectorAll('#padtest button').forEach(b => {
-  b.addEventListener('pointerdown', async (e) => { e.preventDefault(); await ensureAudio(); playSample(PAD_SAMPLE[b.dataset.pad]); });
+  b.addEventListener('pointerdown', async (e) => { e.preventDefault(); await ensureAudio(); playSample(PAD_SAMPLE[b.dataset.pad]); if (b.dataset.pad === 'splash') fxStardustBlast(); });
 });
 $('ctaPlay').onclick = () => startSong(TRACKS[1]); // Cathedral Rain, Easy — recommended first song
 // Pause-screen mix sliders (drums / music balance, live)
@@ -505,7 +609,7 @@ async function startSong(t) {
     return el;
   });
   // countdown then go
-  $('judge').textContent = 'Ready…'; $('judge').className = 'perfect';
+  $('judge').textContent = 'Drifting off…'; $('judge').className = 'perfect';
   setTimeout(() => { if (track === t && !$('game').classList.contains('hidden')) beginPlayback(); }, 600);
 }
 function beginPlayback() {
@@ -567,6 +671,9 @@ function tapPad(pad) {
   if (el) { el.classList.add('pressed'); setTimeout(() => el.classList.remove('pressed'), 120); }
   if (!actx) return;
   playSample(PAD_SAMPLE[pad]);
+  // Stardust is optional free play: its tap also fires the centred
+  // rainbow-swirl blast (dual purpose, fitting "stardust").
+  if (pad === 'splash') fxStardustBlast();
   if (!playing || paused) return;
   const t = songTime();
   // nearest unjudged note on this pad within the hit window
@@ -587,6 +694,40 @@ document.querySelectorAll('#pads .pad').forEach(b => {
   b.addEventListener('pointerdown', (e) => { e.preventDefault(); tapPad(b.dataset.pad); });
 });
 
+// ---- Keyboard (Nov 13, Cori: desktop/laptop players) ----
+// D F J K (or 1-4) play the pads left-to-right, through the SAME
+// tapPad() path as a tap — same scoring, sounds, pad flash, and
+// (Dream) Stardust blast. Key repeats are ignored. Space/Enter
+// starts from the song list, restarts from results, or resumes
+// from pause. P pauses / resumes in-game.
+const KEY_PAD = { d:'kick', f:'snare', j:'hat', k:'splash', 1:'kick', 2:'snare', 3:'hat', 4:'splash' };
+document.addEventListener('keydown', async (e) => {
+  if (e.repeat) return;
+  const k = (e.key || '').toLowerCase();
+  const overlayOpen = (id) => !$(id).classList.contains('hidden');
+  if (k === ' ' || k === 'enter') {
+    e.preventDefault();
+    if (overlayOpen('resultOverlay')) { $('againBtn').click(); return; }
+    if (overlayOpen('pauseOverlay')) { $('resumeBtn').click(); return; }
+    if (!$('select').classList.contains('hidden')) startSong(TRACKS[1]);
+    return;
+  }
+  if (k === 'p') {
+    if (overlayOpen('pauseOverlay')) { $('resumeBtn').click(); }
+    else if (playing && !paused) { $('pauseBtn').click(); }
+    return;
+  }
+  const pad = KEY_PAD[k];
+  if (!pad) return;
+  if (!$('game').classList.contains('hidden')) { tapPad(pad); return; }
+  if (!$('select').classList.contains('hidden')) {
+    // try-out on the select screen: same as tapping a try-out pad
+    await ensureAudio();
+    playSample(PAD_SAMPLE[pad]);
+    if (pad === 'splash' && typeof fxStardustBlast === 'function') fxStardustBlast();
+  }
+});
+
 function endSong() {
   if (!playing) return;
   playing = false; cancelAnimationFrame(raf); stopSource();
@@ -595,7 +736,7 @@ function endSong() {
   const total = counts.perfect + counts.good + counts.miss;
   const acc = total ? (counts.perfect + counts.good * 0.5) / total : 0;
   const grade = acc >= 0.95 ? 'S' : acc >= 0.85 ? 'A' : acc >= 0.7 ? 'B' : acc >= 0.5 ? 'C' : 'D';
-  $('resultTitle').textContent = track.title + ' — complete!';
+  $('resultTitle').textContent = track.title + ' — the dream fades…';
   $('resultGrade').textContent = grade;
   $('resultStats').innerHTML =
     `Score: <b>${score}</b><br>Perfect: <b>${counts.perfect}</b> · Good: <b>${counts.good}</b> · Miss: <b>${counts.miss}</b><br>` +
@@ -607,7 +748,7 @@ function endSong() {
 $('pauseBtn').onclick = () => {
   if (!playing) return;
   paused = true; actx.suspend();
-  $('pauseText').textContent = track.title + ' — paused. Your place is saved.';
+  $('pauseText').textContent = track.title + ' — paused. The dream waits for you.';
   $('pauseOverlay').classList.remove('hidden');
 };
 $('resumeBtn').onclick = async () => { $('pauseOverlay').classList.add('hidden'); paused = false; await actx.resume(); };
