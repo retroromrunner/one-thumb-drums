@@ -194,3 +194,9 @@ Published with here.now. Note: the stock `publish.py` fails uploading the
 ~3 MB song MP3s (urllib `RemoteDisconnected` on the R2 PUTs) — republish
 with `../publish_retry.py`, which PUTs files with curl + retries:
 `PYTHONPATH=/opt/muse/skills/custom-connector-setup/bin python3 ../publish_retry.py . "One-Thumb Drums"`
+
+## Future: beginner trainer song (Nov 17, 2026)
+
+- Replaying the game, it's hard for beginners, especially if you're not musically inclined. Current timing (Perfect ±70 ms, Good ±140 ms) was deliberately left as-is — the designer (a musician) finds it suitably challenging.
+- For the next similar game, add a slow beginner trainer song: only 1 instrument for the first part of the song, then up to 2 instruments (2 lanes), so it's easier to handle.
+- Widening the note bubbles / timing windows was considered and rejected as the main fix: it gives more clearance for a score, but it defeats the point — hitting the note at the right time is what goes with the music.
